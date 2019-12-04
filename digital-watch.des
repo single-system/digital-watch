@@ -18,15 +18,16 @@ STATECHART:
 TRANSITION:
     S: A
     N: B
-    E: on
-    O: print "A -> B"
-       g.setLightBulbOn()
+    E: lightOn
+    O: print "set light on"
+       g.setIndiglo()
 
 TRANSITION:
     S: B
     N: B
-    E: on
-    O: print "B (self-loop)"
+    E: lightOff
+    O: print "light off"
+       g.unsetIndiglo()
 
 TRANSITION:
     S: B
