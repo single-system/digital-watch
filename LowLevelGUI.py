@@ -1,6 +1,8 @@
 from Tkinter import *
 import time
 
+DEBUGKEY='d'
+
 CANVAS_W = 222
 CANVAS_H = 236
 
@@ -107,6 +109,12 @@ class LowLevelGUI:
 
     self.displayCanvas.bind("<ButtonPress-1>", self.mouse1Click)
     self.displayCanvas.bind("<ButtonRelease-1>", self.mouse1Release)
+
+    self.displayCanvas.bind('<KeyPress>', self.key_stroke)
+
+  def key_stroke(self, e):
+    if e.keysym==DEBUGKEY:
+      self.controller.debug()
 
   def mouse1Click(self, event):
     X = self.displayCanvas.canvasx(event.x)

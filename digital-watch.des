@@ -1,6 +1,7 @@
 INITIALIZER:
     from Tkinter import *
     from DWatchGUI import DWatchGUI
+    debugger.InterruptEvent('GUI Debug')
 
     root = Tk()
     root.title("A Title")

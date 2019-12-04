@@ -21,6 +21,9 @@ class DWatchGUI:
   # Events to be sent to the Statechart
   # -----------------------------------
 
+  def debug(self):
+    self.eventhandler.event('GUI Debug')
+
   def topRightPressed(self):
     self.eventhandler.event("lightOn")
     print "topRightPressed"
