@@ -24,20 +24,7 @@ TRANSITION:
 
 TRANSITION:
     S: B
-    N: B
+    N: A
     E: lightOff
     O: print "light off"
        g.unsetIndiglo()
-
-TRANSITION:
-    S: B
-    N: A
-    E: off
-    O: print "B -> A"
-       g.setLightBulbOff()
-
-TRANSITION:
-    S: A
-    N: A
-    E: off
-    O: print "A (self-loop)"
