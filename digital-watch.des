@@ -29,3 +29,16 @@ TRANSITION:
     E: lightOff
     O: print "light off"
        g.unsetIndiglo()
+
+
+TRANSITION:
+    S: A
+    N: A
+    E: e
+    O: [EVENT("f", ["message", "Hello World"])]
+
+TRANSITION:
+    S: A
+    N: B
+    E: f
+    O: [DUMP([PARAMS][0]+": "+[PARAMS][1])]
