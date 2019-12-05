@@ -1,3 +1,23 @@
+#############
+# DESCRIPTION
+#############
+
+# [DS]: default state
+# [FS]: final state
+# [OTT]: once timed transition
+# [RTT]: repeated timed transition
+
+# S: source
+# N: destination
+# E: event
+# O: commands
+# C: condition
+# T: timed transition
+
+#################
+# DESCRIPTION END
+#################
+
 INITIALIZER:
     from Tkinter import *
     from DWatchGUI import DWatchGUI
@@ -13,44 +33,50 @@ INITIALIZER:
     exit()
 
 STATECHART:
-    A [DS]
-    B
-
-# TRANSITION:
-#     S: A
-#     N: B
-#     E: lightOn
-#     O: print "set light on"
-#        g.setIndiglo()
-# 
-# TRANSITION:
-#     S: B
-#     N: A
-#     E: lightOff
-#     O: print "light off"
-#        g.unsetIndiglo()
-# 
-# 
-# TRANSITION:
-#     S: A
-#     N: A
-#     E: e
-#     O: [EVENT("f", ["message", "Hello World"])]
-# 
-# TRANSITION:
-#     S: A
-#     N: B
-#     E: f
-#     O: [DUMP([PARAMS][0]+": "+[PARAMS][1])]
+    Initial[DS]
+    Time
+      TimeDisplay
+      TimeEdit
+    Alarm
+      AlarmDisplay
+      AlarmEdit
+    Chrono
+      ChronoDisplay
 
 TRANSITION:
-    S: A
-    N: B
+    S: Initial
+    N: Time.TimeDisplay
     T: 1 [OTT]
-    O: [DUMP("start printing")]
+    O: [DUMP("start The Time")]
+
+##################
+# TIME TRANSITIONS
+##################
 
 TRANSITION:
-    S: B
-    N: B
+    S: Time.TimeDisplay
+    N: Time.TimeDisplay
     T: 1  # by default, it is [RTT]
     O: g.increaseTimeByOne()
+
+TRANSITION:
+    S: Time.TimeDisplay
+    N: Time.TimeEdit
+    E: editTime
+    O: g.startSelection()
+
+TRANSITION:
+    S: Time.TimeEdit
+    N: Time.TimeEdit
+    E: selectNext
+    O: g.selectNext()
+
+TRANSITION:
+    S: Time.TimeEdit
+    N: Time.TimeEdit
+    E: increase
+    O: g.increaseSelection()
+
+######################
+# TIME TRANSITIONS END
+######################
