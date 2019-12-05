@@ -16,29 +16,41 @@ STATECHART:
     A [DS]
     B
 
+# TRANSITION:
+#     S: A
+#     N: B
+#     E: lightOn
+#     O: print "set light on"
+#        g.setIndiglo()
+# 
+# TRANSITION:
+#     S: B
+#     N: A
+#     E: lightOff
+#     O: print "light off"
+#        g.unsetIndiglo()
+# 
+# 
+# TRANSITION:
+#     S: A
+#     N: A
+#     E: e
+#     O: [EVENT("f", ["message", "Hello World"])]
+# 
+# TRANSITION:
+#     S: A
+#     N: B
+#     E: f
+#     O: [DUMP([PARAMS][0]+": "+[PARAMS][1])]
+
 TRANSITION:
     S: A
     N: B
-    E: lightOn
-    O: print "set light on"
-       g.setIndiglo()
+    T: 1 [OTT]
+    O: [DUMP("start printing")]
 
 TRANSITION:
     S: B
-    N: A
-    E: lightOff
-    O: print "light off"
-       g.unsetIndiglo()
-
-
-TRANSITION:
-    S: A
-    N: A
-    E: e
-    O: [EVENT("f", ["message", "Hello World"])]
-
-TRANSITION:
-    S: A
     N: B
-    E: f
-    O: [DUMP([PARAMS][0]+": "+[PARAMS][1])]
+    T: 1  # by default, it is [RTT]
+    O: g.increaseTimeByOne()
