@@ -8,6 +8,7 @@ PRESS_TO_ACTIVATE_DURATION_MS = 1500
 PRESS_TO_DEACTIVATE_DURATION_MS = 2000
 AUTO_FINISH_EDIT_AFTER_MS = 5000
 end_auto_finish_edit_time_timer = None
+finish_edit_time_timer = None
 
 
 class DWatchGUI:
@@ -72,7 +73,12 @@ class DWatchGUI:
 
   def maybeFinishEditTime(self):
     self.is_bottom_right_pressed = True
-    self.parent.after(PRESS_TO_DEACTIVATE_DURATION_MS, self.tryFinishEditTime)
+    self.finish_edit_time_timer = self.parent.after(PRESS_TO_DEACTIVATE_DURATION_MS, self.tryFinishEditTime)
+
+
+  def endFinishEditTimeTimer(self):
+    self.parent.after_cancel(self.finish_edit_time_timer)
+
 
   def tryActivateEditTime(self):
     if self.is_bottom_right_pressed:
@@ -80,7 +86,6 @@ class DWatchGUI:
 
 
   def tryFinishEditTime(self):
-    print 'try finish'
     if self.is_bottom_right_pressed:
       self.finishEditTime()
 
