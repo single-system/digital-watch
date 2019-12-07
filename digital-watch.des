@@ -34,88 +34,112 @@ INITIALIZER:
 
 STATECHART:
     Initial[DS]
-    Time
-      TimeDisplay
-      TimeEdit
-    Alarm
-      AlarmDisplay
-      AlarmEdit
-    Chrono
-      ChronoDisplay
+    Started
+      Time[CS][DS]
+        TimeDisplay[DS]
+        TimeEdit
+      Alarm
+        AlarmDisplay
+        AlarmEdit
+      Chrono
+        ChronoDisplay
+      Light[CS][DS]
+        Off[DS]
+        On
 
 TRANSITION:
     S: Initial
-    N: Time.TimeDisplay
+    N: Started.Time.TimeDisplay
     T: 1 [OTT]
     O: [DUMP("start The Time")]
+
+#######
+# LIGHT
+#######
+
+TRANSITION:
+    S: Started.Light.Off
+    N: Started.Light.On
+    E: lightOn
+    O: g.setIndiglo() 
+
+TRANSITION:
+    S: Started.Light.On
+    N: Started.Light.Off
+    E: lightOff
+    O: g.unsetIndiglo()
+
+###########
+# LIGHT END
+###########
 
 ##################
 # TIME TRANSITIONS
 ##################
 
 TRANSITION:
-    S: Time.TimeDisplay
-    N: Time.TimeDisplay
+    S: Started.Time.TimeDisplay
+    N: Started.Time.TimeDisplay
     T: 1  # by default, it is [RTT]
     O: g.increaseTimeByOne()
 
 TRANSITION:
-    S: Time.TimeDisplay
-    N: Time.TimeEdit
+    S: Started.Time.TimeDisplay
+    N: Started.Time.TimeEdit
     E: editTime
     O: g.startSelection()
        g.setToEditTimeInProgress(True)
 
 TRANSITION:
-    S: Time.TimeEdit
-    N: Time.TimeEdit
+    S: Started.Time.TimeEdit
+    N: Started.Time.TimeEdit
     E: released
     O: g.setToEditTimeInProgress(False)
        g.startAutoFinishEditTimeTimer()
        g.endFinishEditTimeTimer()
 
 TRANSITION:
-    S: Time.TimeEdit
-    N: Time.TimeEdit
+    S: Started.Time.TimeEdit
+    N: Started.Time.TimeEdit
     E: bottomLeftReleased
     O: g.startAutoFinishEditTimeTimer()
 
 TRANSITION:
-    S: Time.TimeEdit
-    N: Time.TimeEdit
+    S: Started.Time.TimeEdit
+    N: Started.Time.TimeEdit
     E: topLeftReleased
     O: g.startAutoFinishEditTimeTimer()
 
 TRANSITION:
-    S: Time.TimeEdit
-    N: Time.TimeEdit
+    S: Started.Time.TimeEdit
+    N: Started.Time.TimeEdit
     E: selectNext
     O: g.selectNext()
        g.endAutoFinishEditTimeTimer()
 
 TRANSITION:
-    S: Time.TimeEdit
-    N: Time.TimeEdit
+    S: Started.Time.TimeEdit
+    N: Started.Time.TimeEdit
     E: increase
     O: g.increaseSelection()
        g.endAutoFinishEditTimeTimer()
 
 TRANSITION:
-    S: Time.TimeEdit
-    N: Time.TimeEdit
+    S: Started.Time.TimeEdit
+    N: Started.Time.TimeEdit
     C: g.getIncreasePressed()
     T: 0.3 [RTT]
     O: g.increaseSelection()
 
 TRANSITION:
-    S: Time.TimeEdit
-    N: Time.TimeEdit
+    S: Started.Time.TimeEdit
+    N: Started.Time.TimeEdit
     E: bottomRightPressed
     O: g.endAutoFinishEditTimeTimer()
 
 TRANSITION:
-    S: Time.TimeEdit
-    N: Time.TimeDisplay
+    S: Started.Time.TimeEdit
+    N: Started.Time.TimeDisplay
     E: finishEdit
     C: not g.getToEditTimeInProgress()
     O: g.stopSelection()

@@ -4,6 +4,7 @@ import time
 
 PRESS_TO_ACTIVATE_DURATION_MS = 1500
 PRESS_TO_DEACTIVATE_DURATION_MS = 2000
+LIGHT_OFF_DURATION_MS = 2000
 AUTO_FINISH_EDIT_AFTER_MS = 5000
 
 
@@ -23,6 +24,7 @@ class DWatchGUI:
 
     self.end_auto_finish_edit_time_timer = None
     self.finish_edit_time_timer = None
+    self.light_off_timer = None
 
   def handleEventOn(self):
     self.eventhandler.event("on")
@@ -38,13 +40,30 @@ class DWatchGUI:
   def debug(self):
     self.eventhandler.event('GUI Debug')
 
+
   def topRightPressed(self):
     self.eventhandler.event("lightOn")
+    self.endLightOffTimer()
     print "topRightPressed"
 
+
   def topRightReleased(self):
-    self.eventhandler.event("lightOff")
+    self.startLightOffTimer()
     print "topRightReleased"
+
+
+  def startLightOffTimer(self):
+    self.light_off_timer = self.parent.after(LIGHT_OFF_DURATION_MS, self.lightOff)
+
+
+  def endLightOffTimer(self):
+    if self.light_off_timer is not None:
+      self.parent.after_cancel(self.light_off_timer)
+
+
+  def lightOff(self):
+    self.eventhandler.event('lightOff')
+
 
   def topLeftPressed(self):
     self.eventhandler.event("changeMode")
