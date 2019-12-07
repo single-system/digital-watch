@@ -6,6 +6,8 @@ is_bottom_right_pressed = True
 to_edit_time_in_progress = True
 PRESS_TO_ACTIVATE_DURATION_MS = 1500
 PRESS_TO_DEACTIVATE_DURATION_MS = 2000
+AUTO_FINISH_EDIT_AFTER_MS = 5000
+end_auto_finish_edit_time_timer = None
 
 
 class DWatchGUI:
@@ -45,12 +47,22 @@ class DWatchGUI:
     self.eventhandler.event('selectNext')
 
   def topLeftReleased(self):
-    print "topLeftReleased"
+    print 'topLeftReleased'
+    self.eventhandler.event('topLeftReleased')
 
   def bottomRightPressed(self):
-    self.eventhandler.event("initChrono")
+    self.eventhandler.event('bottomRightPressed')
+    self.eventhandler.event('initChrono')
     self.maybeEditTime()
     self.maybeFinishEditTime()
+
+
+  def startAutoFinishEditTimeTimer(self):
+    self.end_auto_finish_edit_time_timer = self.parent.after(AUTO_FINISH_EDIT_AFTER_MS, self.finishEditTime)
+
+
+  def endAutoFinishEditTimeTimer(self):
+    self.parent.after_cancel(self.end_auto_finish_edit_time_timer)
 
 
   def maybeEditTime(self):
@@ -62,27 +74,26 @@ class DWatchGUI:
     self.is_bottom_right_pressed = True
     self.parent.after(PRESS_TO_DEACTIVATE_DURATION_MS, self.tryFinishEditTime)
 
-
   def tryActivateEditTime(self):
     if self.is_bottom_right_pressed:
       self.eventhandler.event('editTime')
+
+
+  def tryFinishEditTime(self):
+    if self.is_bottom_right_pressed:
+      self.finishEditTime()
+
+
+  def finishEditTime(self):
+    self.eventhandler.event('finishEdit')
 
 
   def setToEditTimeInProgress(self, to_edit_time_in_progress):
     self.to_edit_time_in_progress = to_edit_time_in_progress
 
 
-  def toggleToEditTimeInProgress(self):
-    self.setToEditTimeInProgress(not self.to_edit_time_in_progress)
-
-
   def getToEditTimeInProgress(self):
     return self.to_edit_time_in_progress
-
-
-  def tryFinishEditTime(self):
-    if self.is_bottom_right_pressed:
-      self.eventhandler.event('finishEdit')
 
 
   def bottomRightReleased(self):
@@ -96,9 +107,10 @@ class DWatchGUI:
     self.eventhandler.event("setAlarm")
 
   def bottomLeftReleased(self):
-    self.eventhandler.event("stopInc")
-    self.eventhandler.event("onoff")
-    print "bottomLeftReleased"
+    self.eventhandler.event('stopInc')
+    self.eventhandler.event('onoff')
+    self.eventhandler.event('bottomLeftReleased')
+    print 'bottomLeftReleased'
 
   def alarmStart(self):
     self.eventhandler.event("alarming")

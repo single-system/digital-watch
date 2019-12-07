@@ -70,19 +70,40 @@ TRANSITION:
     S: Time.TimeEdit
     N: Time.TimeEdit
     E: released
-    O: g.toggleToEditTimeInProgress()
+    O: g.setToEditTimeInProgress(False)
+       g.startAutoFinishEditTimeTimer()
+
+TRANSITION:
+    S: Time.TimeEdit
+    N: Time.TimeEdit
+    E: bottomLeftReleased
+    O: g.startAutoFinishEditTimeTimer()
+
+TRANSITION:
+    S: Time.TimeEdit
+    N: Time.TimeEdit
+    E: topLeftReleased
+    O: g.startAutoFinishEditTimeTimer()
 
 TRANSITION:
     S: Time.TimeEdit
     N: Time.TimeEdit
     E: selectNext
     O: g.selectNext()
+       g.endAutoFinishEditTimeTimer()
 
 TRANSITION:
     S: Time.TimeEdit
     N: Time.TimeEdit
     E: increase
     O: g.increaseSelection()
+       g.endAutoFinishEditTimeTimer()
+
+TRANSITION:
+    S: Time.TimeEdit
+    N: Time.TimeEdit
+    E: bottomRightPressed
+    O: g.endAutoFinishEditTimeTimer()
 
 TRANSITION:
     S: Time.TimeEdit
@@ -90,6 +111,7 @@ TRANSITION:
     E: finishEdit
     C: not g.getToEditTimeInProgress()
     O: g.stopSelection()
+       g.endAutoFinishEditTimeTimer()
 
 ######################
 # TIME TRANSITIONS END
