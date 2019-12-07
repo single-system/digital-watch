@@ -80,6 +80,7 @@ class DWatchGUI:
 
 
   def tryFinishEditTime(self):
+    print 'try finish'
     if self.is_bottom_right_pressed:
       self.finishEditTime()
 
