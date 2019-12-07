@@ -64,6 +64,13 @@ TRANSITION:
     N: Time.TimeEdit
     E: editTime
     O: g.startSelection()
+       g.setToEditTimeInProgress(True)
+
+TRANSITION:
+    S: Time.TimeEdit
+    N: Time.TimeEdit
+    E: released
+    O: g.toggleToEditTimeInProgress()
 
 TRANSITION:
     S: Time.TimeEdit
@@ -76,6 +83,13 @@ TRANSITION:
     N: Time.TimeEdit
     E: increase
     O: g.increaseSelection()
+
+TRANSITION:
+    S: Time.TimeEdit
+    N: Time.TimeDisplay
+    E: finishEdit
+    C: not g.getToEditTimeInProgress()
+    O: g.stopSelection()
 
 ######################
 # TIME TRANSITIONS END
