@@ -2,7 +2,10 @@ from Tkinter import *
 from LowLevelGUI import *
 import time
 
-is_bottom_right_pressed = True
+PRESS_TO_ACTIVATE_DURATION_MS = 1500
+PRESS_TO_DEACTIVATE_DURATION_MS = 2000
+AUTO_FINISH_EDIT_AFTER_MS = 5000
+
 
 class DWatchGUI:
   def __init__(self, parent, eventhandler):
@@ -13,6 +16,13 @@ class DWatchGUI:
     self.parent = parent
 
     self.handleEventOn
+
+    self.is_bottom_right_pressed = False
+    self.is_bottom_left_pressed = False
+    self.to_edit_time_in_progress = False
+
+    self.end_auto_finish_edit_time_timer = None
+    self.finish_edit_time_timer = None
 
   def handleEventOn(self):
     self.eventhandler.event("on")
@@ -41,37 +51,98 @@ class DWatchGUI:
     self.eventhandler.event('selectNext')
 
   def topLeftReleased(self):
-    print "topLeftReleased"
+    print 'topLeftReleased'
+    self.eventhandler.event('topLeftReleased')
 
   def bottomRightPressed(self):
-    self.eventhandler.event("initChrono")
+    self.eventhandler.event('bottomRightPressed')
+    self.eventhandler.event('initChrono')
     self.maybeEditTime()
-    self.eventhandler.event("finishEdit")
+    self.maybeFinishEditTime()
+
+
+  def startAutoFinishEditTimeTimer(self):
+    self.end_auto_finish_edit_time_timer = self.parent.after(AUTO_FINISH_EDIT_AFTER_MS, self.finishEditTime)
+
+
+  def endAutoFinishEditTimeTimer(self):
+    self.parent.after_cancel(self.end_auto_finish_edit_time_timer)
 
 
   def maybeEditTime(self):
-    self.is_bottom_right_pressed = True
-    self.parent.after(1500, self.tryActivateEditTime)
+    self.setBottomRightPressed(True)
+    self.parent.after(PRESS_TO_ACTIVATE_DURATION_MS, self.tryActivateEditTime)
+
+
+  def maybeFinishEditTime(self):
+    self.setBottomRightPressed(True)
+    self.finish_edit_time_timer = self.parent.after(PRESS_TO_DEACTIVATE_DURATION_MS, self.tryFinishEditTime)
+
+
+  def endFinishEditTimeTimer(self):
+    self.parent.after_cancel(self.finish_edit_time_timer)
 
 
   def tryActivateEditTime(self):
-    if self.is_bottom_right_pressed:
-        self.eventhandler.event("editTime")
+    if self.getBottomRightPressed():
+      self.eventhandler.event('editTime')
+
+
+  def tryFinishEditTime(self):
+    if self.getBottomRightPressed():
+      self.finishEditTime()
+
+
+  def finishEditTime(self):
+    self.eventhandler.event('finishEdit')
+
+
+  def setToEditTimeInProgress(self, to_edit_time_in_progress):
+    self.to_edit_time_in_progress = to_edit_time_in_progress
+
+
+  def getToEditTimeInProgress(self):
+    return self.to_edit_time_in_progress
 
 
   def bottomRightReleased(self):
-    self.is_bottom_right_pressed = False
-    self.eventhandler.event("released")
+    self.setBottomRightPressed(False)
+    self.eventhandler.event('released')
+
+
+  def setBottomRightPressed(self, is_pressed):
+    self.is_bottom_right_pressed = is_pressed
+
+
+  def getBottomRightPressed(self):
+    return self.is_bottom_right_pressed
+
 
   def bottomLeftPressed(self):
     self.eventhandler.event("resetChrono")
     self.eventhandler.event("increase")
+    self.setBottomLeftPressed(True)
     self.eventhandler.event("setAlarm")
 
+
+  def setBottomLeftPressed(self, is_pressed):
+    self.is_bottom_left_pressed = is_pressed
+
+
+  def getBottomLeftPressed(self):
+    return self.is_bottom_left_pressed
+
+
+  def getIncreasePressed(self):
+    return self.getBottomLeftPressed()
+
+
   def bottomLeftReleased(self):
-    self.eventhandler.event("stopInc")
-    self.eventhandler.event("onoff")
-    print "bottomLeftReleased"
+    self.eventhandler.event('stopInc')
+    self.eventhandler.event('onoff')
+    self.eventhandler.event('bottomLeftReleased')
+    self.setBottomLeftPressed(False)
+    print 'bottomLeftReleased'
 
   def alarmStart(self):
     self.eventhandler.event("alarming")
@@ -104,7 +175,7 @@ class DWatchGUI:
   def increaseChronoByOne(self):
     self.GUI.increaseChronoByOne()
 
-  #Select current display:
+  # Select current display:
 
   def startSelection(self):
     self.GUI.startSelection()

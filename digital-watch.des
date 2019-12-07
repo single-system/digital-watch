@@ -64,18 +64,62 @@ TRANSITION:
     N: Time.TimeEdit
     E: editTime
     O: g.startSelection()
+       g.setToEditTimeInProgress(True)
+
+TRANSITION:
+    S: Time.TimeEdit
+    N: Time.TimeEdit
+    E: released
+    O: g.setToEditTimeInProgress(False)
+       g.startAutoFinishEditTimeTimer()
+       g.endFinishEditTimeTimer()
+
+TRANSITION:
+    S: Time.TimeEdit
+    N: Time.TimeEdit
+    E: bottomLeftReleased
+    O: g.startAutoFinishEditTimeTimer()
+
+TRANSITION:
+    S: Time.TimeEdit
+    N: Time.TimeEdit
+    E: topLeftReleased
+    O: g.startAutoFinishEditTimeTimer()
 
 TRANSITION:
     S: Time.TimeEdit
     N: Time.TimeEdit
     E: selectNext
     O: g.selectNext()
+       g.endAutoFinishEditTimeTimer()
 
 TRANSITION:
     S: Time.TimeEdit
     N: Time.TimeEdit
     E: increase
     O: g.increaseSelection()
+       g.endAutoFinishEditTimeTimer()
+
+TRANSITION:
+    S: Time.TimeEdit
+    N: Time.TimeEdit
+    C: g.getIncreasePressed()
+    T: 0.3 [RTT]
+    O: g.increaseSelection()
+
+TRANSITION:
+    S: Time.TimeEdit
+    N: Time.TimeEdit
+    E: bottomRightPressed
+    O: g.endAutoFinishEditTimeTimer()
+
+TRANSITION:
+    S: Time.TimeEdit
+    N: Time.TimeDisplay
+    E: finishEdit
+    C: not g.getToEditTimeInProgress()
+    O: g.stopSelection()
+       g.endAutoFinishEditTimeTimer()
 
 ######################
 # TIME TRANSITIONS END
