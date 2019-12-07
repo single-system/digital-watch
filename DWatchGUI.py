@@ -21,6 +21,8 @@ class DWatchGUI:
 
     self.handleEventOn
 
+    self.is_bottom_left_pressed = False
+
   def handleEventOn(self):
     self.eventhandler.event("on")
 
@@ -110,12 +112,27 @@ class DWatchGUI:
   def bottomLeftPressed(self):
     self.eventhandler.event("resetChrono")
     self.eventhandler.event("increase")
+    self.setBottomLeftPressed(True)
     self.eventhandler.event("setAlarm")
+
+
+  def setBottomLeftPressed(self, is_pressed):
+    self.is_bottom_left_pressed = is_pressed
+
+
+  def getBottomLeftPressed(self):
+    return self.is_bottom_left_pressed
+
+
+  def getIncreasePressed(self):
+    return self.getBottomLeftPressed()
+
 
   def bottomLeftReleased(self):
     self.eventhandler.event('stopInc')
     self.eventhandler.event('onoff')
     self.eventhandler.event('bottomLeftReleased')
+    self.setBottomLeftPressed(False)
     print 'bottomLeftReleased'
 
   def alarmStart(self):

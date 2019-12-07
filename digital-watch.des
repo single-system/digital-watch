@@ -103,6 +103,13 @@ TRANSITION:
 TRANSITION:
     S: Time.TimeEdit
     N: Time.TimeEdit
+    C: g.getIncreasePressed()
+    T: 0.3 [RTT]
+    O: g.increaseSelection()
+
+TRANSITION:
+    S: Time.TimeEdit
+    N: Time.TimeEdit
     E: bottomRightPressed
     O: g.endAutoFinishEditTimeTimer()
 
