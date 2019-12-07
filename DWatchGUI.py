@@ -2,7 +2,6 @@ from Tkinter import *
 from LowLevelGUI import *
 import time
 
-is_bottom_right_pressed = True
 to_edit_time_in_progress = True
 PRESS_TO_ACTIVATE_DURATION_MS = 1500
 PRESS_TO_DEACTIVATE_DURATION_MS = 2000
@@ -21,6 +20,7 @@ class DWatchGUI:
 
     self.handleEventOn
 
+    self.is_bottom_right_pressed = False
     self.is_bottom_left_pressed = False
 
   def handleEventOn(self):
@@ -69,12 +69,12 @@ class DWatchGUI:
 
 
   def maybeEditTime(self):
-    self.is_bottom_right_pressed = True
+    self.setBottomRightPressed(True)
     self.parent.after(PRESS_TO_ACTIVATE_DURATION_MS, self.tryActivateEditTime)
 
 
   def maybeFinishEditTime(self):
-    self.is_bottom_right_pressed = True
+    self.setBottomRightPressed(True)
     self.finish_edit_time_timer = self.parent.after(PRESS_TO_DEACTIVATE_DURATION_MS, self.tryFinishEditTime)
 
 
@@ -83,12 +83,12 @@ class DWatchGUI:
 
 
   def tryActivateEditTime(self):
-    if self.is_bottom_right_pressed:
+    if self.getBottomRightPressed():
       self.eventhandler.event('editTime')
 
 
   def tryFinishEditTime(self):
-    if self.is_bottom_right_pressed:
+    if self.getBottomRightPressed():
       self.finishEditTime()
 
 
@@ -105,8 +105,16 @@ class DWatchGUI:
 
 
   def bottomRightReleased(self):
-    self.is_bottom_right_pressed = False
+    self.setBottomRightPressed(False)
     self.eventhandler.event('released')
+
+
+  def setBottomRightPressed(self, is_pressed):
+    self.is_bottom_right_pressed = is_pressed
+
+
+  def getBottomRightPressed(self):
+    return self.is_bottom_right_pressed
 
 
   def bottomLeftPressed(self):
