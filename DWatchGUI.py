@@ -2,12 +2,9 @@ from Tkinter import *
 from LowLevelGUI import *
 import time
 
-to_edit_time_in_progress = True
 PRESS_TO_ACTIVATE_DURATION_MS = 1500
 PRESS_TO_DEACTIVATE_DURATION_MS = 2000
 AUTO_FINISH_EDIT_AFTER_MS = 5000
-end_auto_finish_edit_time_timer = None
-finish_edit_time_timer = None
 
 
 class DWatchGUI:
@@ -22,6 +19,10 @@ class DWatchGUI:
 
     self.is_bottom_right_pressed = False
     self.is_bottom_left_pressed = False
+    self.to_edit_time_in_progress = False
+
+    self.end_auto_finish_edit_time_timer = None
+    self.finish_edit_time_timer = None
 
   def handleEventOn(self):
     self.eventhandler.event("on")
