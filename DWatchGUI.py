@@ -26,6 +26,8 @@ class DWatchGUI:
     self.finish_edit_time_timer = None
     self.light_off_timer = None
 
+    self.is_chrono_running = False
+
   def handleEventOn(self):
     self.eventhandler.event("on")
 
@@ -193,6 +195,12 @@ class DWatchGUI:
 
   def increaseChronoByOne(self):
     self.GUI.increaseChronoByOne()
+  
+  def setChrono(self, chrono_running):
+    self.is_chrono_running = chrono_running
+
+  def getChrono(self):
+    return self.is_chrono_running 
 
   # Select current display:
 
