@@ -198,76 +198,124 @@ TRANSITION:
 # Change mode from time to Alarm
 TRANSITION:
     S: Started.Time.TimeDisplay
-    N: Started.Alarm
+    N: Started.Alarm.AlarmDisplay
     E: setAlarm
     C: g.getActiveMode() is 'time'
     O: g.setActiveMode('alarm')
        g.refreshAlarmDisplay()
        [DUMP('change mode from time to alarm')]
 
-# Top left press
+# From alarm display to alarm edit
 TRANSITION:
-    S: Started.Alarm
-    N: Started.Alarm
-    E: selectNext
+    S: Started.Alarm.AlarmDisplay
+    N: Started.Alarm.AlarmEdit
+    E: editAlarm
     C: g.getActiveMode() is 'alarm'
-    O: g.endAutoFinishAlarmModeTimer()
-       [DUMP('Alarm: top left press, end auto end timer')]
-
-# Bottom left press
-TRANSITION:
-    S: Started.Alarm
-    N: Started.Alarm
-    E: setAlarm
-    C: g.getActiveMode() is 'alarm'
-    O: g.endAutoFinishAlarmModeTimer()
-       [DUMP('Alarm: bottom left press, end auto end timer')]
-
-# Bottom right press
-TRANSITION:
-    S: Started.Alarm
-    N: Started.Alarm
-    E: bottomRightPressed
-    C: g.getActiveMode() is 'alarm'
-    O: g.endAutoFinishAlarmModeTimer()
-       [DUMP('Alarm: bottom right press, end auto end timer, start close on press timer')]
-
-# Top left release
-TRANSITION:
-    S: Started.Alarm
-    N: Started.Alarm
-    E: topLeftReleased
-    C: g.getActiveMode() is 'alarm'
-    O: g.startAutoFinishAlarmModeTimer()
-       [DUMP('Alarm: top left release, start auto end timer')]
-
-# Bottom left release
-TRANSITION:
-    S: Started.Alarm
-    N: Started.Alarm
-    E: bottomLeftReleased
-    C: g.getActiveMode() is 'alarm'
-    O: g.startAutoFinishAlarmModeTimer()
-       [DUMP('Alarm: bottom left release, start auto end timer')]
-
-# Bottom right release
-TRANSITION:
-    S: Started.Alarm
-    N: Started.Alarm
-    E: released
-    C: g.getActiveMode() is 'alarm'
-    O: g.startAutoFinishAlarmModeTimer()
-       [DUMP('Alarm: bottom right release, start auto end timer')]
+    O: g.setActiveMode('alarmEdit')
+       g.startSelection()
+       [DUMP('change mode from alarm display to alarm edit')]
 
 # From alarm to time display
 TRANSITION:
     S: Started.Alarm
     N: Started.Time.TimeDisplay
     E: finishAlarmMode
-    C: g.getActiveMode() is 'alarm'
+    C: g.getActiveMode() is 'alarm' or g.getActiveMode() is 'alarmEdit'
     O: g.setActiveMode('time')
        g.endAutoFinishAlarmModeTimer()
+       g.stopSelection()
        [DUMP('change mode from alarm to time')]
+
+# Top left press
+TRANSITION:
+    S: Started.Alarm.AlarmEdit
+    N: Started.Alarm.AlarmEdit
+    E: selectNext
+    C: g.getActiveMode() is 'alarmEdit'
+    O: g.endAutoFinishAlarmModeTimer()
+       [DUMP('Alarm: top left press, end auto end timer')]
+
+# Bottom left press
+TRANSITION:
+    S: Started.Alarm.AlarmDisplay
+    N: Started.Alarm.AlarmDisplay
+    E: setAlarm
+    C: g.getActiveMode() is 'alarm'
+    O: g.endAutoFinishAlarmModeTimer()
+       g.maybeEditAlarm()
+       g.setAlarm()
+       [DUMP('Alarm: bottom left press, end auto end timer, start to edit mode timer, set alarm')]
+
+TRANSITION:
+    S: Started.Alarm.AlarmEdit
+    N: Started.Alarm.AlarmEdit
+    E: setAlarm
+    C: g.getActiveMode() is 'alarmEdit'
+    O: g.endAutoFinishAlarmModeTimer()
+       # TODO: increase (event)
+       [DUMP('Alarm: bottom left press, end auto end timer, start to edit mode timer')]
+
+# Bottom right press
+TRANSITION:
+    S: Started.Alarm.AlarmDisplay
+    N: Started.Alarm.AlarmDisplay
+    E: bottomRightPressed
+    C: g.getActiveMode() is 'alarm'
+    O: g.endAutoFinishAlarmModeTimer()
+       g.maybeFinishAlarmMode()
+       [DUMP('Alarm: bottom right press, end auto end timer, start close on press timer')]
+
+TRANSITION:
+    S: Started.Alarm.AlarmEdit
+    N: Started.Alarm.AlarmEdit
+    E: bottomRightPressed
+    C: g.getActiveMode() is 'alarmEdit'
+    O: g.endAutoFinishAlarmModeTimer()
+       g.maybeFinishAlarmMode()
+       [DUMP('Alarm: bottom right press, end auto end timer, start close on press timer')]
+
+# Top left release
+TRANSITION:
+    S: Started.Alarm.AlarmEdit
+    N: Started.Alarm.AlarmEdit
+    E: topLeftReleased
+    C: g.getActiveMode() is 'alarmEdit'
+    O: g.startAutoFinishAlarmModeTimer()
+       [DUMP('Alarm: top left release, start auto end timer')]
+
+# Bottom left release
+TRANSITION:
+    S: Started.Alarm.AlarmDisplay
+    N: Started.Alarm.AlarmDisplay
+    E: bottomLeftReleased
+    C: g.getActiveMode() is 'alarm'
+    O: g.startAutoFinishAlarmModeTimer()
+       [DUMP('Alarm: bottom left release, start auto end timer')]
+
+TRANSITION:
+    S: Started.Alarm.AlarmEdit
+    N: Started.Alarm.AlarmEdit
+    E: bottomLeftReleased
+    C: g.getActiveMode() is 'alarmEdit'
+    O: g.startAutoFinishAlarmModeTimer()
+       [DUMP('Alarm: bottom left release, start auto end timer')]
+
+# Bottom right release
+TRANSITION:
+    S: Started.Alarm.AlarmDisplay
+    N: Started.Alarm.AlarmDisplay
+    E: released
+    C: g.getActiveMode() is 'alarm'
+    O: g.startAutoFinishAlarmModeTimer()
+       [DUMP('Alarm: bottom right release, start auto end timer')]
+
+TRANSITION:
+    S: Started.Alarm.AlarmEdit
+    N: Started.Alarm.AlarmEdit
+    E: released
+    C: g.getActiveMode() is 'alarmEdit'
+    O: g.startAutoFinishAlarmModeTimer()
+       [DUMP('Alarm: bottom right release, start auto end timer')]
 
 #######################
 # ALARM TRANSITIONS END

@@ -63,7 +63,6 @@ class DWatchGUI:
         self.eventhandler.event('initChrono')
         self.maybeEditTime()
         self.maybeFinishEditTime()
-        self.maybeFinishAlarmMode()
 
     def topRightPressed(self):
         self.eventhandler.event('lightOn')
@@ -108,6 +107,14 @@ class DWatchGUI:
     def finishEditTime(self):
         self.eventhandler.event('finishEdit')
 
+    def maybeEditAlarm(self):
+        self.setBottomLeftPressed(True)
+        self.parent.after(PRESS_TO_ACTIVATE_DURATION_MS, self.tryActivateEditAlarm)
+
+    def tryActivateEditAlarm(self):
+        if self.getBottomLeftPressed():
+            self.eventhandler.event('editAlarm')
+
     def maybeFinishAlarmMode(self):
         self.setBottomRightPressed(True)
         self.finish_alarm_mode_timer = self.parent.after(PRESS_TO_DEACTIVATE_DURATION_MS, self.tryFinishAlarmMode)
@@ -126,6 +133,20 @@ class DWatchGUI:
     def getToEditTimeInProgress(self):
         return self.to_edit_time_in_progress
 
+    def alarmStart(self):
+        self.eventhandler.event('alarming')
+        print('alarmStart')
+
+    def lightOff(self):
+        self.eventhandler.event('lightOff')
+
+    def debug(self):
+        self.eventhandler.event('GUI Debug')
+
+    # -----------------------------------
+    # Getters/Setters
+    # -----------------------------------
+
     def setBottomRightPressed(self, is_pressed):
         self.is_bottom_right_pressed = is_pressed
 
@@ -140,16 +161,6 @@ class DWatchGUI:
 
     def getIncreasePressed(self):
         return self.getBottomLeftPressed()
-
-    def alarmStart(self):
-        self.eventhandler.event('alarming')
-        print('alarmStart')
-
-    def lightOff(self):
-        self.eventhandler.event('lightOff')
-
-    def debug(self):
-        self.eventhandler.event('GUI Debug')
 
     # -----------------------------------
     # Interaction with the GUI elements
