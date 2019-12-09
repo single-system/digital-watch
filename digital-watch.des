@@ -35,7 +35,7 @@ INITIALIZER:
 
 STATECHART:
     Initial[DS]
-    Started[HS*]
+    Started
       Time[CS][DS]
         TimeDisplay[CS][DS]
         TimeEdit[CS]
@@ -118,30 +118,6 @@ ENTER:
     C: g.checkTime() is True and g.getIsAlarmOn() and not g.getIsAlarmActive()
     O: g.setIsAlarmActive(True)
        g.alarmStart()
-
-TRANSITION:
-    S: Started.Time.TimeDisplay
-    N: AlarmActive
-    E: alarming
-    O: [DUMP(g.getIsAlarmOn())]
-
-TRANSITION:
-    S: AlarmActive
-    N: AlarmActive
-    T: 0.5 [RTT]
-    O: g.blink()
-
-TRANSITION: [-1]
-    S: AlarmActive
-    N: Started.Time.TimeDisplay
-    E: stopActiveAlarm
-
-TRANSITION: [HS]
-    S: AlarmActive
-    N: Started.Time.TimeDisplay
-    T: 4 [OTT]
-    O: g.setIsAlarmActive(False)
-       g.unsetIndiglo()
 
 # From time display to time edit
 TRANSITION:
@@ -370,6 +346,39 @@ TRANSITION:
 #######################
 # ALARM TRANSITIONS END
 #######################
+
+##############
+# ACTIVE ALARM
+##############
+
+TRANSITION:
+    S: Started.Time.TimeDisplay
+    N: AlarmActive
+    E: alarming
+    O: [DUMP(g.getIsAlarmOn())]
+
+TRANSITION:
+    S: AlarmActive
+    N: AlarmActive
+    T: 0.5 [RTT]
+    O: g.blink()
+
+TRANSITION:
+    S: AlarmActive
+    N: Started.Time.TimeDisplay
+    E: stopActiveAlarm
+    O: g.unsetIndiglo()
+
+TRANSITION:
+    S: AlarmActive
+    N: Started.Time.TimeDisplay
+    T: 4 [OTT]
+    O: g.setIsAlarmActive(False)
+       g.unsetIndiglo()
+
+##################
+# ACTIVE ALARM END
+##################
 
 ####################
 # CHRONO TRANSITIONS

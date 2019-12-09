@@ -52,35 +52,35 @@ class DWatchGUI:
 
     def topLeftPressed(self):
         print('topLeftPressed')
+        self.eventhandler.event('stopActiveAlarm')
         self.eventhandler.event('changeMode', self.getActiveMode())
         self.eventhandler.event('selectNext')
-        self.eventhandler.event('stopActiveAlarm')
 
     def bottomLeftPressed(self):
         print('bottomLeftPressed')
+        self.eventhandler.event('stopActiveAlarm')
         self.eventhandler.event('resetChrono')
         self.eventhandler.event('increase')
         self.setBottomLeftPressed(True)
         self.eventhandler.event('setAlarm')
-        self.eventhandler.event('stopActiveAlarm')
 
     def bottomRightPressed(self):
+        self.eventhandler.event('stopActiveAlarm')
         self.eventhandler.event('bottomRightPressed')
         self.eventhandler.event('initChrono')
         self.maybeEditTime()
         self.maybeFinishEditTime()
-        self.eventhandler.event('stopActiveAlarm')
 
     def topRightPressed(self):
+        self.eventhandler.event('stopActiveAlarm')
         self.eventhandler.event('lightOn')
         self.endLightOffTimer()
         print('topRightPressed')
-        self.eventhandler.event('stopActiveAlarm')
 
     def topLeftReleased(self):
         print('topLeftReleased')
-        self.eventhandler.event('topLeftReleased')
         self.eventhandler.event('stopActiveAlarm')
+        self.eventhandler.event('topLeftReleased')
 
     def bottomLeftReleased(self):
         print('bottomLeftReleased')
@@ -133,7 +133,6 @@ class DWatchGUI:
             self.finishAlarmMode()
 
     def finishAlarmMode(self):
-        print('finish alarm mode')
         self.eventhandler.event('finishAlarmMode')
 
     def setToEditTimeInProgress(self, to_edit_time_in_progress):
@@ -293,5 +292,4 @@ class DWatchGUI:
 
     def endAutoFinishAlarmModeTimer(self):
         if self.end_auto_finish_alarm_mode_timer is not None:
-            print('end timer')
             self.parent.after_cancel(self.end_auto_finish_alarm_mode_timer)
