@@ -28,8 +28,11 @@ class DWatchGUI:
         self.is_chrono_running = False
 
         self.end_auto_finish_edit_time_timer = None
-        self.end_auto_finish_alarm_mode_timer = None
         self.finish_edit_time_timer = None
+
+        self.end_auto_finish_alarm_mode_timer = None
+        self.finish_alarm_mode_timer = None
+
         self.light_off_timer = None
 
     def handleEventOn(self):
@@ -60,6 +63,7 @@ class DWatchGUI:
         self.eventhandler.event('initChrono')
         self.maybeEditTime()
         self.maybeFinishEditTime()
+        self.maybeFinishAlarmMode()
 
     def topRightPressed(self):
         self.eventhandler.event('lightOn')
@@ -104,20 +108,23 @@ class DWatchGUI:
     def finishEditTime(self):
         self.eventhandler.event('finishEdit')
 
+    def maybeFinishAlarmMode(self):
+        self.setBottomRightPressed(True)
+        self.finish_alarm_mode_timer = self.parent.after(PRESS_TO_DEACTIVATE_DURATION_MS, self.tryFinishAlarmMode)
+
+    def tryFinishAlarmMode(self):
+        if self.getBottomRightPressed():
+            self.finishAlarmMode()
+
     def finishAlarmMode(self):
         print('finish alarm mode')
+        self.eventhandler.event('finishAlarmMode')
 
     def setToEditTimeInProgress(self, to_edit_time_in_progress):
         self.to_edit_time_in_progress = to_edit_time_in_progress
 
     def getToEditTimeInProgress(self):
         return self.to_edit_time_in_progress
-
-    # def setToEditAlarmInProgress(self, to_edit_alarm_in_progress):
-    #   self.to_edit_alarm_in_progress = to_edit_alarm_in_progress
-
-    # def getToEditAlarmInProgress(self):
-    #   return self.to_edit_alarm_in_progress
 
     def setBottomRightPressed(self, is_pressed):
         self.is_bottom_right_pressed = is_pressed

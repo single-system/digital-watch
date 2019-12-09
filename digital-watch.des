@@ -25,7 +25,7 @@ INITIALIZER:
     debugger.InterruptEvent('GUI Debug')
 
     root = Tk()
-    root.title("A lovely watch")
+    root.title('A lovely watch')
     g = DWatchGUI(root, eventhandler)
 
     eventhandler.start()
@@ -203,6 +203,7 @@ TRANSITION:
     C: g.getActiveMode() is 'time'
     O: g.setActiveMode('alarm')
        g.refreshAlarmDisplay()
+       [DUMP('change mode from time to alarm')]
 
 # Top left press
 TRANSITION:
@@ -211,7 +212,7 @@ TRANSITION:
     E: selectNext
     C: g.getActiveMode() is 'alarm'
     O: g.endAutoFinishAlarmModeTimer()
-       [DUMP('top left press, end auto end timer')]
+       [DUMP('Alarm: top left press, end auto end timer')]
 
 # Bottom left press
 TRANSITION:
@@ -220,7 +221,7 @@ TRANSITION:
     E: setAlarm
     C: g.getActiveMode() is 'alarm'
     O: g.endAutoFinishAlarmModeTimer()
-       [DUMP('bottom left press, end auto end timer')]
+       [DUMP('Alarm: bottom left press, end auto end timer')]
 
 # Bottom right press
 TRANSITION:
@@ -229,7 +230,7 @@ TRANSITION:
     E: bottomRightPressed
     C: g.getActiveMode() is 'alarm'
     O: g.endAutoFinishAlarmModeTimer()
-       [DUMP('bottom right press, end auto end timer')]
+       [DUMP('Alarm: bottom right press, end auto end timer, start close on press timer')]
 
 # Top left release
 TRANSITION:
@@ -238,7 +239,7 @@ TRANSITION:
     E: topLeftReleased
     C: g.getActiveMode() is 'alarm'
     O: g.startAutoFinishAlarmModeTimer()
-       [DUMP('top left release, start auto end timer')]
+       [DUMP('Alarm: top left release, start auto end timer')]
 
 # Bottom left release
 TRANSITION:
@@ -247,7 +248,26 @@ TRANSITION:
     E: bottomLeftReleased
     C: g.getActiveMode() is 'alarm'
     O: g.startAutoFinishAlarmModeTimer()
-       [DUMP('bottom left release, start auto end timer')]
+       [DUMP('Alarm: bottom left release, start auto end timer')]
+
+# Bottom right release
+TRANSITION:
+    S: Started.Alarm
+    N: Started.Alarm
+    E: released
+    C: g.getActiveMode() is 'alarm'
+    O: g.startAutoFinishAlarmModeTimer()
+       [DUMP('Alarm: bottom right release, start auto end timer')]
+
+# From alarm to time display
+TRANSITION:
+    S: Started.Alarm
+    N: Started.Time.TimeDisplay
+    E: finishAlarmMode
+    C: g.getActiveMode() is 'alarm'
+    O: g.setActiveMode('time')
+       g.endAutoFinishAlarmModeTimer()
+       [DUMP('change mode from alarm to time')]
 
 #######################
 # ALARM TRANSITIONS END
@@ -318,7 +338,7 @@ TRANSITION:
     E: changeMode
     C: [PARAMS] is 'chrono'
     O: g.setActiveMode('time')
-       [DUMP("change mode from chrono to time")]
+       [DUMP('change mode from chrono to time')]
 
 # Change mode from running chrono to time
 TRANSITION:
@@ -327,7 +347,7 @@ TRANSITION:
     E: changeMode
     C: [PARAMS] is 'chrono'
     O: g.setActiveMode('time')
-       [DUMP("change mode from chrono to time")]
+       [DUMP('change mode from chrono to time')]
 
 ########################
 # CHRONO TRANSITIONS END
