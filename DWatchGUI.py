@@ -18,9 +18,13 @@ class DWatchGUI:
 
     self.handleEventOn
 
+    self.active_mode = None
+
     self.is_bottom_right_pressed = False
     self.is_bottom_left_pressed = False
+
     self.to_edit_time_in_progress = False
+    self.is_chrono_running = False
 
     self.end_auto_finish_edit_time_timer = None
     self.finish_edit_time_timer = None
@@ -67,7 +71,7 @@ class DWatchGUI:
 
   def topLeftPressed(self):
     print'topLeftPressed'
-    self.eventhandler.event("changeMode")
+    self.eventhandler.event("changeMode", self.getActiveMode())
     self.eventhandler.event('selectNext')
 
   def topLeftReleased(self):
@@ -192,6 +196,16 @@ class DWatchGUI:
   # -----------------------------------
   #Modify the state:
 
+
+  def setActiveMode(self, mode):
+    self.active_mode = mode
+
+
+  # getActiveMode
+  def getActiveMode(self):
+    return self.active_mode
+
+
   def refreshTimeDisplay(self):
     self.GUI.drawTime()
 
@@ -206,13 +220,18 @@ class DWatchGUI:
 
   def increaseTimeByOne(self):
     self.GUI.increaseTimeByOne()
-    self.refreshTimeDisplay()
 
   def resetChrono(self):
     self.GUI.resetChrono()
 
   def increaseChronoByOne(self):
     self.GUI.increaseChronoByOne()
+
+  def setChrono(self, chrono_running):
+    self.is_chrono_running = chrono_running
+
+  def getChrono(self):
+    return self.is_chrono_running
 
   # Select current display:
 

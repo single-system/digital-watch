@@ -25,7 +25,7 @@ INITIALIZER:
     debugger.InterruptEvent('GUI Debug')
 
     root = Tk()
-    root.title("A Title")
+    root.title("A lovely watch")
     g = DWatchGUI(root, eventhandler)
 
     eventhandler.start()
@@ -42,17 +42,19 @@ STATECHART:
       Alarm[CS][DS]
         AlarmDisplay[DS]
         AlarmEdit
-      Chrono
-        ChronoDisplay
+      Chrono[CS][DS]
+        ChronoStopped[DS]
+        ChronoRunning
       Light[CS][DS]
-        Off[DS]
-        On
+        Off[DS][CS]
+        On[DS][CS]
 
 TRANSITION:
     S: Initial
     N: Started.Time.TimeDisplay
     T: 1 [OTT]
     O: [DUMP("start The Time")]
+       g.setActiveMode('time')
 
 #######
 # LIGHT
@@ -62,7 +64,7 @@ TRANSITION:
     S: Started.Light.Off
     N: Started.Light.On
     E: lightOn
-    O: g.setIndiglo() 
+    O: g.setIndiglo()
 
 TRANSITION:
     S: Started.Light.On
@@ -83,6 +85,11 @@ TRANSITION:
     N: Started.Time.TimeDisplay
     T: 1  # by default, it is [RTT]
     O: g.increaseTimeByOne()
+
+ENTER:
+    N: Started.Time.TimeDisplay
+    C: g.getActiveMode() is 'time'
+    O: g.refreshTimeDisplay()
 
 TRANSITION:
     S: Started.Time.TimeDisplay
@@ -172,4 +179,96 @@ TRANSITION:
 
 ######################
 # ALARM TRANSITIONS END
+######################
+=======
+
+######################
+# CHRONO TRANSITIONS
+######################
+
+### change mode from time to stopped chrono
+TRANSITION:
+    S: Started.Time.TimeDisplay
+    N: Started.Chrono.ChronoStopped
+    E: changeMode
+    C: g.getChrono() is False
+    O: g.refreshChronoDisplay()
+       g.setActiveMode('chrono')
+       [DUMP("change mode from time to chrono")]
+
+### change mode from time to running chrono
+TRANSITION:
+    S: Started.Time.TimeDisplay
+    N: Started.Chrono.ChronoRunning
+    E: changeMode
+    C: g.getChrono() is True
+    O: g.refreshChronoDisplay()
+       g.setActiveMode('chrono')
+       [DUMP("change mode from time to chrono")]
+
+### start chrono with bottom right button
+TRANSITION:
+    S: Started.Chrono.ChronoStopped
+    N: Started.Chrono.ChronoRunning
+    E: initChrono
+    O: g.setChrono(True)
+
+### stop chrono with bottom right button
+TRANSITION:
+    S: Started.Chrono.ChronoRunning
+    N: Started.Chrono.ChronoStopped
+    E: initChrono
+    O: g.setChrono(False)
+
+### reset chrono with bottom left button
+TRANSITION:
+    S: Started.Chrono.ChronoStopped
+    N: Started.Chrono.ChronoStopped
+    E: resetChrono
+    C: g.getActiveMode() is 'chrono'
+    O: g.resetChrono()
+       g.refreshChronoDisplay()
+
+### reset chrono with bottom left button
+TRANSITION:
+    S: Started.Chrono.ChronoRunning
+    N: Started.Chrono.ChronoRunning
+    C: g.getActiveMode() is 'chrono'
+    E: resetChrono
+    O: g.resetChrono()
+       g.refreshChronoDisplay()
+
+### change mode from stopped chrono to time
+TRANSITION:
+    S: Started.Chrono.ChronoStopped
+    N: Started.Time.TimeDisplay
+    E: changeMode
+    C: [PARAMS] is 'chrono'
+    O: [DUMP("change mode from chrono to time")]
+       g.setActiveMode('time')
+
+### change mode from running chrono to time
+TRANSITION:
+    S: Started.Chrono.ChronoRunning
+    N: Started.Time.TimeDisplay
+    E: changeMode
+    C: [PARAMS] is 'chrono'
+    O: [DUMP("change mode from chrono to time")]
+       g.setActiveMode('time')
+
+### chrono running in the background
+ENTER:
+    N: Started.Time.TimeDisplay
+    C: g.getActiveMode() is 'time' and g.getChrono()
+    O: g.increaseChronoByOne()
+
+### chrono is running
+ENTER:
+    N: Started.Time.TimeDisplay
+    C: g.getActiveMode() is 'chrono' and g.getChrono() is True
+    O: g.increaseChronoByOne()
+       g.refreshChronoDisplay()
+
+######################
+# CHRONO TRANSITIONS END
 ######################
