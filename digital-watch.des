@@ -37,8 +37,8 @@ STATECHART:
     Initial[DS]
     Started
       Time[CS][DS]
-        TimeDisplay[DS]
-        TimeEdit
+        TimeDisplay[CS][DS]
+        TimeEdit[CS]
       Alarm[CS][DS]
         AlarmDisplay[DS]
         AlarmEdit
@@ -53,8 +53,8 @@ TRANSITION:
     S: Initial
     N: Started.Time.TimeDisplay
     T: 1 [OTT]
-    O: [DUMP("start The Time")]
-       g.setActiveMode('time')
+    O: g.setActiveMode('time')
+       [DUMP('start The Time')]
 
 #######
 # LIGHT
@@ -80,28 +80,88 @@ TRANSITION:
 # TIME TRANSITIONS
 ##################
 
+# Generic one second interval
 TRANSITION:
     S: Started.Time.TimeDisplay
     N: Started.Time.TimeDisplay
     T: 1  # by default, it is [RTT]
+
+# The Time
+ENTER:
+    N: Started.Time.TimeDisplay
+    C: g.getActiveMode() is not 'timeEdit'
     O: g.increaseTimeByOne()
 
+# Draw The Time
 ENTER:
     N: Started.Time.TimeDisplay
     C: g.getActiveMode() is 'time'
     O: g.refreshTimeDisplay()
 
+# Chrono running in the background
+ENTER:
+    N: Started.Time.TimeDisplay
+    C: g.getActiveMode() is not 'chrono' and g.getChrono()
+    O: g.increaseChronoByOne()
+
+# Chrono is running in the foreground
+ENTER:
+    N: Started.Time.TimeDisplay
+    C: g.getActiveMode() is 'chrono' and g.getChrono() is True
+    O: g.increaseChronoByOne()
+       g.refreshChronoDisplay()
+
+# From time display to time edit
 TRANSITION:
     S: Started.Time.TimeDisplay
     N: Started.Time.TimeEdit
     E: editTime
-    O: g.startSelection()
+    C: g.getActiveMode() is 'time'
+    O: g.setActiveMode('timeEdit')
+       g.startSelection()
        g.setToEditTimeInProgress(True)
+
+# From time edit to time display
+TRANSITION:
+    S: Started.Time.TimeEdit
+    N: Started.Time.TimeDisplay
+    E: finishEdit
+    C: g.getActiveMode() is 'timeEdit' and not g.getToEditTimeInProgress()
+    O: g.setActiveMode('time')
+       g.stopSelection()
+       g.endAutoFinishEditTimeTimer()
+
+# Select next digit group
+TRANSITION:
+    S: Started.Time.TimeEdit
+    N: Started.Time.TimeEdit
+    E: selectNext
+    C: g.getActiveMode() is 'timeEdit'
+    O: g.selectNext()
+       g.endAutoFinishEditTimeTimer()
+
+# Increases the currently selected digit group's value by one
+TRANSITION:
+    S: Started.Time.TimeEdit
+    N: Started.Time.TimeEdit
+    E: increase
+    C: g.getActiveMode() is 'timeEdit'
+    O: g.increaseSelection()
+       g.endAutoFinishEditTimeTimer()
+
+# Auto increase the currently selected digit group's value by one
+TRANSITION:
+    S: Started.Time.TimeEdit
+    N: Started.Time.TimeEdit
+    C: g.getActiveMode() is 'timeEdit' and g.getIncreasePressed()
+    T: 0.3 [RTT]
+    O: g.increaseSelection()
 
 TRANSITION:
     S: Started.Time.TimeEdit
     N: Started.Time.TimeEdit
     E: released
+    C: g.getActiveMode() is 'timeEdit'
     O: g.setToEditTimeInProgress(False)
        g.startAutoFinishEditTimeTimer()
        g.endFinishEditTimeTimer()
@@ -110,48 +170,22 @@ TRANSITION:
     S: Started.Time.TimeEdit
     N: Started.Time.TimeEdit
     E: bottomLeftReleased
+    C: g.getActiveMode() is 'timeEdit'
     O: g.startAutoFinishEditTimeTimer()
 
 TRANSITION:
     S: Started.Time.TimeEdit
     N: Started.Time.TimeEdit
     E: topLeftReleased
+    C: g.getActiveMode() is 'timeEdit'
     O: g.startAutoFinishEditTimeTimer()
 
 TRANSITION:
     S: Started.Time.TimeEdit
     N: Started.Time.TimeEdit
-    E: selectNext
-    O: g.selectNext()
-       g.endAutoFinishEditTimeTimer()
-
-TRANSITION:
-    S: Started.Time.TimeEdit
-    N: Started.Time.TimeEdit
-    E: increase
-    O: g.increaseSelection()
-       g.endAutoFinishEditTimeTimer()
-
-TRANSITION:
-    S: Started.Time.TimeEdit
-    N: Started.Time.TimeEdit
-    C: g.getIncreasePressed()
-    T: 0.3 [RTT]
-    O: g.increaseSelection()
-
-TRANSITION:
-    S: Started.Time.TimeEdit
-    N: Started.Time.TimeEdit
     E: bottomRightPressed
+    C: g.getActiveMode() is 'timeEdit'
     O: g.endAutoFinishEditTimeTimer()
-
-TRANSITION:
-    S: Started.Time.TimeEdit
-    N: Started.Time.TimeDisplay
-    E: finishEdit
-    C: not g.getToEditTimeInProgress()
-    O: g.stopSelection()
-       g.endAutoFinishEditTimeTimer()
 
 ######################
 # TIME TRANSITIONS END
@@ -161,17 +195,14 @@ TRANSITION:
 # ALARM TRANSITIONS
 ###################
 
-### change mode from time to Alarm
-ENTER:
-    N: Started.Alarm
-    C: g.getActiveMode() is 'time'
-    O: g.refreshAlarmDisplay()
-
+# Change mode from time to Alarm
 TRANSITION:
     S: Started.Time.TimeDisplay
     N: Started.Alarm.AlarmDisplay
-    E: activateAlarm
-    O: g.refreshAlarmDisplay()
+    E: setAlarm
+    C: g.getActiveMode() is 'time'
+    O: g.setActiveMode('alarm')
+       g.refreshAlarmDisplay()
 
 #######################
 # ALARM TRANSITIONS END
@@ -181,41 +212,43 @@ TRANSITION:
 # CHRONO TRANSITIONS
 ####################
 
-### change mode from time to stopped chrono
+# Change mode from time to stopped chrono
 TRANSITION:
     S: Started.Time.TimeDisplay
     N: Started.Chrono.ChronoStopped
     E: changeMode
-    C: g.getChrono() is False
-    O: g.refreshChronoDisplay()
-       g.setActiveMode('chrono')
-       [DUMP("change mode from time to chrono")]
+    C: g.getChrono() is False and [PARAMS] is 'time'
+    O: g.setActiveMode('chrono')
+       g.refreshChronoDisplay()
+       [DUMP("now change mode from time to chrono")]
 
-### change mode from time to running chrono
+# Change mode from time to running chrono
 TRANSITION:
     S: Started.Time.TimeDisplay
     N: Started.Chrono.ChronoRunning
     E: changeMode
-    C: g.getChrono() is True
-    O: g.refreshChronoDisplay()
-       g.setActiveMode('chrono')
+    C: g.getChrono() is True and [PARAMS] is 'time'
+    O: g.setActiveMode('chrono')
+       g.refreshChronoDisplay()
        [DUMP("change mode from time to chrono")]
 
-### start chrono with bottom right button
+# Start chrono with bottom right button
 TRANSITION:
     S: Started.Chrono.ChronoStopped
     N: Started.Chrono.ChronoRunning
     E: initChrono
+    C: g.getActiveMode() is 'chrono'
     O: g.setChrono(True)
 
-### stop chrono with bottom right button
+# Stop chrono with bottom right button
 TRANSITION:
     S: Started.Chrono.ChronoRunning
     N: Started.Chrono.ChronoStopped
     E: initChrono
+    C: g.getActiveMode() is 'chrono'
     O: g.setChrono(False)
 
-### reset chrono with bottom left button
+# Reset chrono with bottom left button
 TRANSITION:
     S: Started.Chrono.ChronoStopped
     N: Started.Chrono.ChronoStopped
@@ -224,7 +257,7 @@ TRANSITION:
     O: g.resetChrono()
        g.refreshChronoDisplay()
 
-### reset chrono with bottom left button
+# Reset chrono with bottom left button
 TRANSITION:
     S: Started.Chrono.ChronoRunning
     N: Started.Chrono.ChronoRunning
@@ -233,36 +266,23 @@ TRANSITION:
     O: g.resetChrono()
        g.refreshChronoDisplay()
 
-### change mode from stopped chrono to time
+# Change mode from stopped chrono to time
 TRANSITION:
     S: Started.Chrono.ChronoStopped
     N: Started.Time.TimeDisplay
     E: changeMode
     C: [PARAMS] is 'chrono'
-    O: [DUMP("change mode from chrono to time")]
-       g.setActiveMode('time')
+    O: g.setActiveMode('time')
+       [DUMP("change mode from chrono to time")]
 
-### change mode from running chrono to time
+# Change mode from running chrono to time
 TRANSITION:
     S: Started.Chrono.ChronoRunning
     N: Started.Time.TimeDisplay
     E: changeMode
     C: [PARAMS] is 'chrono'
-    O: [DUMP("change mode from chrono to time")]
-       g.setActiveMode('time')
-
-### chrono running in the background
-ENTER:
-    N: Started.Time.TimeDisplay
-    C: g.getActiveMode() is 'time' and g.getChrono()
-    O: g.increaseChronoByOne()
-
-### chrono is running
-ENTER:
-    N: Started.Time.TimeDisplay
-    C: g.getActiveMode() is 'chrono' and g.getChrono() is True
-    O: g.increaseChronoByOne()
-       g.refreshChronoDisplay()
+    O: g.setActiveMode('time')
+       [DUMP("change mode from chrono to time")]
 
 ########################
 # CHRONO TRANSITIONS END

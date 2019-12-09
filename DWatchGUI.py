@@ -135,15 +135,6 @@ class DWatchGUI:
     return self.to_edit_alarm_in_progress
 
 
-# Alarm Starts
-
-
-  def activateAlarm(self):
-    if self.getBottomLeftPressed(): self.eventhandler.event('activateAlarm')
-
-
-# Alarm Ends
-
   def bottomRightReleased(self):
     self.setBottomRightPressed(False)
     self.eventhandler.event('released')
@@ -197,7 +188,6 @@ class DWatchGUI:
     self.active_mode = mode
 
 
-  # getActiveMode
   def getActiveMode(self):
     return self.active_mode
 
@@ -220,11 +210,14 @@ class DWatchGUI:
   def resetChrono(self):
     self.GUI.resetChrono()
 
+
   def increaseChronoByOne(self):
     self.GUI.increaseChronoByOne()
 
+
   def setChrono(self, chrono_running):
     self.is_chrono_running = chrono_running
+
 
   def getChrono(self):
     return self.is_chrono_running
