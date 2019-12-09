@@ -4,6 +4,7 @@
 
 # [DS]: default state
 # [FS]: final state
+# [CS]: concurrent state
 # [OTT]: once timed transition
 # [RTT]: repeated timed transition
 
@@ -38,8 +39,8 @@ STATECHART:
       Time[CS][DS]
         TimeDisplay[DS]
         TimeEdit
-      Alarm
-        AlarmDisplay
+      Alarm[CS][DS]
+        AlarmDisplay[DS]
         AlarmEdit
       Chrono
         ChronoDisplay
@@ -147,4 +148,28 @@ TRANSITION:
 
 ######################
 # TIME TRANSITIONS END
+######################
+
+##################
+# ALARM TRANSITIONS
+##################
+
+### change mode from time to Alarm
+ENTER:
+    N: Started.Alarm
+    C: g.getActiveMode() is 'time'
+    O: g.refreshAlarmDisplay()
+
+TRANSITION:
+    S: Started.Time.TimeDisplay
+    N: Started.Alarm.AlarmDisplay
+    E: activateAlarm
+    O: g.refreshAlarmDisplay()
+
+
+
+
+
+######################
+# ALARM TRANSITIONS END
 ######################

@@ -66,6 +66,7 @@ class DWatchGUI:
 
 
   def topLeftPressed(self):
+    print'topLeftPressed'
     self.eventhandler.event("changeMode")
     self.eventhandler.event('selectNext')
 
@@ -123,6 +124,25 @@ class DWatchGUI:
   def getToEditTimeInProgress(self):
     return self.to_edit_time_in_progress
 
+  def setToEditAlarmInProgress(self, to_edit_alarm_in_progress):
+    self.to_edit_alarm_in_progress = to_edit_alarm_in_progress
+
+  def getToEditAlarmInProgress(self):
+    return self.to_edit_alarm_in_progress
+
+
+# Alarm Starts
+
+  def activateAlarm(self):
+    if self.getBottomLeftPressed(): self.eventhandler.event('activateAlarm')
+
+# Alarm Ends
+
+
+
+
+
+
 
   def bottomRightReleased(self):
     self.setBottomRightPressed(False)
@@ -136,14 +156,6 @@ class DWatchGUI:
   def getBottomRightPressed(self):
     return self.is_bottom_right_pressed
 
-
-  def bottomLeftPressed(self):
-    self.eventhandler.event("resetChrono")
-    self.eventhandler.event("increase")
-    self.setBottomLeftPressed(True)
-    self.eventhandler.event("setAlarm")
-
-
   def setBottomLeftPressed(self, is_pressed):
     self.is_bottom_left_pressed = is_pressed
 
@@ -155,13 +167,21 @@ class DWatchGUI:
   def getIncreasePressed(self):
     return self.getBottomLeftPressed()
 
+  def bottomLeftPressed(self):
+    print'bottomLeftPressed'
+    self.eventhandler.event("resetChrono")
+    self.eventhandler.event("increase")
+    self.setBottomLeftPressed(True)
+    self.eventhandler.event("setAlarm")
+
 
   def bottomLeftReleased(self):
+    print'bottomLeftReleased'
     self.eventhandler.event('stopInc')
     self.eventhandler.event('onoff')
     self.eventhandler.event('bottomLeftReleased')
     self.setBottomLeftPressed(False)
-    print 'bottomLeftReleased'
+
 
   def alarmStart(self):
     self.eventhandler.event("alarming")
