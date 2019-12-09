@@ -153,7 +153,7 @@ TRANSITION:
 TRANSITION:
     S: Started.Time.TimeEdit
     N: Started.Time.TimeEdit
-    C: g.getActiveMode() is 'timeEdit' and g.getIncreasePressed()
+    C: g.getActiveMode() is 'timeEdit' and g.getIncreasePressed() is True
     T: 0.3 [RTT]
     O: g.increaseSelection()
 
@@ -232,6 +232,15 @@ TRANSITION:
     N: Started.Alarm.AlarmEdit
     E: increase
     C: g.getActiveMode() is 'alarmEdit'
+    O: g.increaseSelection()
+       [DUMP('Increase')]
+
+# Auto increase
+TRANSITION:
+    S: Started.Alarm.AlarmEdit
+    N: Started.Alarm.AlarmEdit
+    C: g.getActiveMode() is 'alarmEdit' and g.getIncreasePressed() is True
+    T: 0.3 [RTT]
     O: g.increaseSelection()
        [DUMP('Increase')]
 
