@@ -35,6 +35,10 @@ class DWatchGUI:
 
         self.light_off_timer = None
 
+        self.is_alarm_on = False
+        self.is_alarm_active = False
+        self.is_alarm_light_on = False
+
     def handleEventOn(self):
         self.eventhandler.event('on')
 
@@ -50,6 +54,7 @@ class DWatchGUI:
         print('topLeftPressed')
         self.eventhandler.event('changeMode', self.getActiveMode())
         self.eventhandler.event('selectNext')
+        self.eventhandler.event('stopActiveAlarm')
 
     def bottomLeftPressed(self):
         print('bottomLeftPressed')
@@ -57,21 +62,25 @@ class DWatchGUI:
         self.eventhandler.event('increase')
         self.setBottomLeftPressed(True)
         self.eventhandler.event('setAlarm')
+        self.eventhandler.event('stopActiveAlarm')
 
     def bottomRightPressed(self):
         self.eventhandler.event('bottomRightPressed')
         self.eventhandler.event('initChrono')
         self.maybeEditTime()
         self.maybeFinishEditTime()
+        self.eventhandler.event('stopActiveAlarm')
 
     def topRightPressed(self):
         self.eventhandler.event('lightOn')
         self.endLightOffTimer()
         print('topRightPressed')
+        self.eventhandler.event('stopActiveAlarm')
 
     def topLeftReleased(self):
         print('topLeftReleased')
         self.eventhandler.event('topLeftReleased')
+        self.eventhandler.event('stopActiveAlarm')
 
     def bottomLeftReleased(self):
         print('bottomLeftReleased')
@@ -135,6 +144,7 @@ class DWatchGUI:
 
     def alarmStart(self):
         self.eventhandler.event('alarming')
+        # TODO: pause timers
         print('alarmStart')
 
     def lightOff(self):
@@ -162,6 +172,21 @@ class DWatchGUI:
     def getIncreasePressed(self):
         return self.getBottomLeftPressed()
 
+    def getIsAlarmOn(self):
+        return self.is_alarm_on
+
+    def getIsAlarmActive(self):
+        return self.is_alarm_active
+
+    def setIsAlarmActive(self, is_active):
+        self.is_alarm_active = is_active
+
+    # Query
+    def getTime(self):
+        return self.GUI.getTime()
+
+    def getAlarm(self):
+        return self.GUI.getAlarm()
     # -----------------------------------
     # Interaction with the GUI elements
     # -----------------------------------
@@ -221,15 +246,17 @@ class DWatchGUI:
     def unsetIndiglo(self):
         self.GUI.unsetIndiglo()
 
+    # Toggle
     def setAlarm(self):
+        self.is_alarm_on = not self.is_alarm_on
         self.GUI.setAlarm()
 
-    # Query
-    def getTime(self):
-        return self.GUI.getTime()
-
-    def getAlarm(self):
-        return self.GUI.getAlarm()
+    def blink(self):
+        if self.is_alarm_light_on:
+            self.unsetIndiglo()
+        else:
+            self.setIndiglo()
+        self.is_alarm_light_on = not self.is_alarm_light_on
 
     # Check if time = alarm set time
     def checkTime(self):
