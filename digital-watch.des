@@ -198,11 +198,35 @@ TRANSITION:
 # Change mode from time to Alarm
 TRANSITION:
     S: Started.Time.TimeDisplay
-    N: Started.Alarm.AlarmDisplay
+    N: Started.Alarm
     E: setAlarm
     C: g.getActiveMode() is 'time'
     O: g.setActiveMode('alarm')
        g.refreshAlarmDisplay()
+
+# Top left press
+TRANSITION:
+    S: Started.Alarm
+    N: Started.Alarm
+    E: selectNext
+    C: g.getActiveMode() is 'alarm'
+    O: [DUMP('top left press alarm, end auto end timer')]
+
+# Bottom left press
+TRANSITION:
+    S: Started.Alarm
+    N: Started.Alarm
+    E: setAlarm
+    C: g.getActiveMode() is 'alarm'
+    O: [DUMP('bottom left press alarm, end auto end timer')]
+
+# Bottom right press
+TRANSITION:
+    S: Started.Alarm
+    N: Started.Alarm
+    E: bottomRightPressed
+    C: g.getActiveMode() is 'alarm'
+    O: [DUMP('bottom right press alarm, end auto end timer')]
 
 #######################
 # ALARM TRANSITIONS END
@@ -220,7 +244,7 @@ TRANSITION:
     C: g.getChrono() is False and [PARAMS] is 'time'
     O: g.setActiveMode('chrono')
        g.refreshChronoDisplay()
-       [DUMP("now change mode from time to chrono")]
+       [DUMP('change mode from time to chrono')]
 
 # Change mode from time to running chrono
 TRANSITION:
@@ -230,7 +254,7 @@ TRANSITION:
     C: g.getChrono() is True and [PARAMS] is 'time'
     O: g.setActiveMode('chrono')
        g.refreshChronoDisplay()
-       [DUMP("change mode from time to chrono")]
+       [DUMP('change mode from time to chrono')]
 
 # Start chrono with bottom right button
 TRANSITION:

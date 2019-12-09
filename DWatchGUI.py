@@ -9,257 +9,232 @@ AUTO_FINISH_EDIT_AFTER_MS = 5000
 
 
 class DWatchGUI:
-  def __init__(self, parent, eventhandler):
-    self.GUI = LowLevelGUI(parent, self)
+    def __init__(self, parent, eventhandler):
+        self.GUI = LowLevelGUI(parent, self)
 
-    self.eventhandler = eventhandler
+        self.eventhandler = eventhandler
 
-    self.parent = parent
+        self.parent = parent
 
-    self.handleEventOn
+        self.handleEventOn
 
-    self.active_mode = None
+        self.active_mode = None
 
-    self.is_bottom_right_pressed = False
-    self.is_bottom_left_pressed = False
+        self.is_bottom_right_pressed = False
+        self.is_bottom_left_pressed = False
 
-    self.to_edit_time_in_progress = False
-    self.is_chrono_running = False
+        self.to_edit_time_in_progress = False
+        # self.to_edit_alarm_in_progress = False
+        self.is_chrono_running = False
 
-    self.end_auto_finish_edit_time_timer = None
-    self.finish_edit_time_timer = None
-    self.light_off_timer = None
+        self.end_auto_finish_edit_time_timer = None
+        self.finish_edit_time_timer = None
+        self.light_off_timer = None
 
-  def handleEventOn(self):
-    self.eventhandler.event("on")
+    def handleEventOn(self):
+        self.eventhandler.event("on")
 
-  def wait(self):
-    self.eventhandler.event("lightOff2")
-    print "wait"
+    def wait(self):
+        self.eventhandler.event("lightOff2")
+        print "wait"
 
-  # -----------------------------------
-  # Events to be sent to the Statechart
-  # -----------------------------------
+    # -----------------------------------
+    # Events to be sent to the Statechart
+    # -----------------------------------
 
-  def debug(self):
-    self.eventhandler.event('GUI Debug')
+    def debug(self):
+        self.eventhandler.event('GUI Debug')
 
+    def topRightPressed(self):
+        self.eventhandler.event('lightOn')
+        self.endLightOffTimer()
+        print 'topRightPressed'
 
-  def topRightPressed(self):
-    self.eventhandler.event("lightOn")
-    self.endLightOffTimer()
-    print "topRightPressed"
+    def topRightReleased(self):
+        self.startLightOffTimer()
+        print "topRightReleased"
 
+    def lightOff(self):
+        self.eventhandler.event('lightOff')
 
-  def topRightReleased(self):
-    self.startLightOffTimer()
-    print "topRightReleased"
+    def topLeftPressed(self):
+        print'topLeftPressed'
+        self.eventhandler.event('changeMode', self.getActiveMode())
+        self.eventhandler.event('selectNext')
 
+    def topLeftReleased(self):
+        print 'topLeftReleased'
+        self.eventhandler.event('topLeftReleased')
 
-  def startLightOffTimer(self):
-    self.light_off_timer = self.parent.after(LIGHT_OFF_DURATION_MS, self.lightOff)
+    def bottomRightPressed(self):
+        self.eventhandler.event('bottomRightPressed')
+        self.eventhandler.event('initChrono')
+        self.maybeEditTime()
+        self.maybeFinishEditTime()
 
+    def maybeEditTime(self):
+        self.setBottomRightPressed(True)
+        self.parent.after(PRESS_TO_ACTIVATE_DURATION_MS, self.tryActivateEditTime)
 
-  def endLightOffTimer(self):
-    if self.light_off_timer is not None:
-      self.parent.after_cancel(self.light_off_timer)
+    def maybeFinishEditTime(self):
+        self.setBottomRightPressed(True)
+        self.finish_edit_time_timer = self.parent.after(PRESS_TO_DEACTIVATE_DURATION_MS, self.tryFinishEditTime)
 
+    def tryActivateEditTime(self):
+        if self.getBottomRightPressed():
+            self.eventhandler.event('editTime')
 
-  def lightOff(self):
-    self.eventhandler.event('lightOff')
+    def tryFinishEditTime(self):
+        if self.getBottomRightPressed():
+            self.finishEditTime()
 
+    def finishEditTime(self):
+        self.eventhandler.event('finishEdit')
 
-  def topLeftPressed(self):
-    print'topLeftPressed'
-    self.eventhandler.event("changeMode", self.getActiveMode())
-    self.eventhandler.event('selectNext')
+    def setToEditTimeInProgress(self, to_edit_time_in_progress):
+        self.to_edit_time_in_progress = to_edit_time_in_progress
 
-  def topLeftReleased(self):
-    print 'topLeftReleased'
-    self.eventhandler.event('topLeftReleased')
+    def getToEditTimeInProgress(self):
+        return self.to_edit_time_in_progress
 
-  def bottomRightPressed(self):
-    self.eventhandler.event('bottomRightPressed')
-    self.eventhandler.event('initChrono')
-    self.maybeEditTime()
-    self.maybeFinishEditTime()
+    # def setToEditAlarmInProgress(self, to_edit_alarm_in_progress):
+    #   self.to_edit_alarm_in_progress = to_edit_alarm_in_progress
 
+    # def getToEditAlarmInProgress(self):
+    #   return self.to_edit_alarm_in_progress
 
-  def startAutoFinishEditTimeTimer(self):
-    self.end_auto_finish_edit_time_timer = self.parent.after(AUTO_FINISH_EDIT_AFTER_MS, self.finishEditTime)
+    def bottomRightReleased(self):
+        self.setBottomRightPressed(False)
+        self.eventhandler.event('released')
 
+    def setBottomRightPressed(self, is_pressed):
+        self.is_bottom_right_pressed = is_pressed
 
-  def endAutoFinishEditTimeTimer(self):
-    self.parent.after_cancel(self.end_auto_finish_edit_time_timer)
+    def getBottomRightPressed(self):
+        return self.is_bottom_right_pressed
 
+    def setBottomLeftPressed(self, is_pressed):
+        self.is_bottom_left_pressed = is_pressed
 
-  def maybeEditTime(self):
-    self.setBottomRightPressed(True)
-    self.parent.after(PRESS_TO_ACTIVATE_DURATION_MS, self.tryActivateEditTime)
+    def getBottomLeftPressed(self):
+        return self.is_bottom_left_pressed
 
+    def getIncreasePressed(self):
+        return self.getBottomLeftPressed()
 
-  def maybeFinishEditTime(self):
-    self.setBottomRightPressed(True)
-    self.finish_edit_time_timer = self.parent.after(PRESS_TO_DEACTIVATE_DURATION_MS, self.tryFinishEditTime)
+    def bottomLeftPressed(self):
+        print 'bottomLeftPressed'
+        self.eventhandler.event('resetChrono')
+        self.eventhandler.event('increase')
+        self.setBottomLeftPressed(True)
+        self.eventhandler.event('setAlarm')
 
+    def bottomLeftReleased(self):
+        print 'bottomLeftReleased'
+        self.eventhandler.event('stopInc')
+        self.eventhandler.event('onoff')
+        self.eventhandler.event('bottomLeftReleased')
+        self.setBottomLeftPressed(False)
 
-  def endFinishEditTimeTimer(self):
-    self.parent.after_cancel(self.finish_edit_time_timer)
+    def alarmStart(self):
+        self.eventhandler.event("alarming")
+        print 'alarmStart'
 
+    # -----------------------------------
+    # Interaction with the GUI elements
+    # -----------------------------------
+    # Modify the state:
 
-  def tryActivateEditTime(self):
-    if self.getBottomRightPressed():
-      self.eventhandler.event('editTime')
+    def setActiveMode(self, mode):
+        self.active_mode = mode
 
+    def getActiveMode(self):
+        return self.active_mode
 
-  def tryFinishEditTime(self):
-    if self.getBottomRightPressed():
-      self.finishEditTime()
+    def refreshTimeDisplay(self):
+        self.GUI.drawTime()
 
+    def refreshChronoDisplay(self):
+        self.GUI.drawChrono()
 
-  def finishEditTime(self):
-    self.eventhandler.event('finishEdit')
+    def refreshDateDisplay(self):
+        self.GUI.drawDate()
 
+    def refreshAlarmDisplay(self):
+        self.GUI.drawAlarm()
 
-  def setToEditTimeInProgress(self, to_edit_time_in_progress):
-    self.to_edit_time_in_progress = to_edit_time_in_progress
+    def increaseTimeByOne(self):
+        self.GUI.increaseTimeByOne()
 
+    def resetChrono(self):
+        self.GUI.resetChrono()
 
-  def getToEditTimeInProgress(self):
-    return self.to_edit_time_in_progress
+    def increaseChronoByOne(self):
+        self.GUI.increaseChronoByOne()
 
-  def setToEditAlarmInProgress(self, to_edit_alarm_in_progress):
-    self.to_edit_alarm_in_progress = to_edit_alarm_in_progress
+    def setChrono(self, chrono_running):
+        self.is_chrono_running = chrono_running
 
-  def getToEditAlarmInProgress(self):
-    return self.to_edit_alarm_in_progress
+    def getChrono(self):
+        return self.is_chrono_running
 
+    # Select current display:
+    def startSelection(self):
+        self.GUI.startSelection()
 
-  def bottomRightReleased(self):
-    self.setBottomRightPressed(False)
-    self.eventhandler.event('released')
+    def selectNext(self):
+        self.GUI.selectNext()
 
+    # Modify the state corresponing to the selection
+    def increaseSelection(self):
+        self.GUI.increaseSelection()
 
-  def setBottomRightPressed(self, is_pressed):
-    self.is_bottom_right_pressed = is_pressed
+    def stopSelection(self):
+        self.GUI.stopSelection()
 
+    # Light / Alarm:
+    def setIndiglo(self):
+        self.GUI.setIndiglo()
 
-  def getBottomRightPressed(self):
-    return self.is_bottom_right_pressed
+    def unsetIndiglo(self):
+        self.GUI.unsetIndiglo()
 
-  def setBottomLeftPressed(self, is_pressed):
-    self.is_bottom_left_pressed = is_pressed
+    def setAlarm(self):
+        self.GUI.setAlarm()
 
+    # Query
+    def getTime(self):
+        return self.GUI.getTime()
 
-  def getBottomLeftPressed(self):
-    return self.is_bottom_left_pressed
+    def getAlarm(self):
+        return self.GUI.getAlarm()
 
+    # Check if time = alarm set time
+    def checkTime(self):
+        if (
+                self.GUI.getTime()[0] == self.GUI.getAlarm()[0] and
+                self.GUI.getTime()[1] == self.GUI.getAlarm()[1] and
+                self.GUI.getTime()[2] == self.GUI.getAlarm()[2]
+        ):
+            return True
+        else:
+            return False
 
-  def getIncreasePressed(self):
-    return self.getBottomLeftPressed()
+    # ------
+    # Timers
+    # ------
+    def startLightOffTimer(self):
+        self.light_off_timer = self.parent.after(LIGHT_OFF_DURATION_MS, self.lightOff)
 
-  def bottomLeftPressed(self):
-    print'bottomLeftPressed'
-    self.eventhandler.event("resetChrono")
-    self.eventhandler.event("increase")
-    self.setBottomLeftPressed(True)
-    self.eventhandler.event("setAlarm")
+    def endLightOffTimer(self):
+        if self.light_off_timer is not None:
+            self.parent.after_cancel(self.light_off_timer)
 
+    def startAutoFinishEditTimeTimer(self):
+        self.end_auto_finish_edit_time_timer = self.parent.after(AUTO_FINISH_EDIT_AFTER_MS, self.finishEditTime)
 
-  def bottomLeftReleased(self):
-    print'bottomLeftReleased'
-    self.eventhandler.event('stopInc')
-    self.eventhandler.event('onoff')
-    self.eventhandler.event('bottomLeftReleased')
-    self.setBottomLeftPressed(False)
+    def endAutoFinishEditTimeTimer(self):
+        self.parent.after_cancel(self.end_auto_finish_edit_time_timer)
 
-
-  def alarmStart(self):
-    self.eventhandler.event("alarming")
-    print "alarmStart"
-
-  # -----------------------------------
-  # Interaction with the GUI elements
-  # -----------------------------------
-  #Modify the state:
-
-
-  def setActiveMode(self, mode):
-    self.active_mode = mode
-
-
-  def getActiveMode(self):
-    return self.active_mode
-
-
-  def refreshTimeDisplay(self):
-    self.GUI.drawTime()
-
-  def refreshChronoDisplay(self):
-    self.GUI.drawChrono()
-
-  def refreshDateDisplay(self):
-    self.GUI.drawDate()
-
-  def refreshAlarmDisplay(self):
-    self.GUI.drawAlarm()
-
-  def increaseTimeByOne(self):
-    self.GUI.increaseTimeByOne()
-
-  def resetChrono(self):
-    self.GUI.resetChrono()
-
-
-  def increaseChronoByOne(self):
-    self.GUI.increaseChronoByOne()
-
-
-  def setChrono(self, chrono_running):
-    self.is_chrono_running = chrono_running
-
-
-  def getChrono(self):
-    return self.is_chrono_running
-
-  # Select current display:
-
-  def startSelection(self):
-    self.GUI.startSelection()
-
-  def selectNext(self):
-    self.GUI.selectNext()
-
-  #Modify the state corresponing to the selection
-  def increaseSelection(self):
-    self.GUI.increaseSelection()
-
-  def stopSelection(self):
-    self.GUI.stopSelection()
-
-
-  #Light / Alarm:
-
-  def setIndiglo(self):
-    self.GUI.setIndiglo()
-
-  def unsetIndiglo(self):
-    self.GUI.unsetIndiglo()
-
-  def setAlarm(self):
-    self.GUI.setAlarm()
-
-  # Query
-  def getTime(self):
-    return self.GUI.getTime()
-
-  def getAlarm(self):
-    return self.GUI.getAlarm()
-
-  #Check if time = alarm set time
-  def checkTime(self):
-    if self.GUI.getTime()[0] == self.GUI.getAlarm()[0] and self.GUI.getTime()[1] == self.GUI.getAlarm()[1] and self.GUI.getTime()[2] == self.GUI.getAlarm()[2]:
-      return True
-    else:
-      return False
-
+    def endFinishEditTimeTimer(self):
+        self.parent.after_cancel(self.finish_edit_time_timer)
