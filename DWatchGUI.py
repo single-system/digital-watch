@@ -137,16 +137,12 @@ class DWatchGUI:
 
 # Alarm Starts
 
+
   def activateAlarm(self):
     if self.getBottomLeftPressed(): self.eventhandler.event('activateAlarm')
 
+
 # Alarm Ends
-
-
-
-
-
-
 
   def bottomRightReleased(self):
     self.setBottomRightPressed(False)

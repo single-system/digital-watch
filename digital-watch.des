@@ -157,9 +157,9 @@ TRANSITION:
 # TIME TRANSITIONS END
 ######################
 
-##################
+###################
 # ALARM TRANSITIONS
-##################
+###################
 
 ### change mode from time to Alarm
 ENTER:
@@ -173,18 +173,13 @@ TRANSITION:
     E: activateAlarm
     O: g.refreshAlarmDisplay()
 
-
-
-
-
-######################
+#######################
 # ALARM TRANSITIONS END
-######################
-=======
+#######################
 
-######################
+####################
 # CHRONO TRANSITIONS
-######################
+####################
 
 ### change mode from time to stopped chrono
 TRANSITION:
@@ -269,6 +264,6 @@ ENTER:
     O: g.increaseChronoByOne()
        g.refreshChronoDisplay()
 
-######################
+########################
 # CHRONO TRANSITIONS END
-######################
+########################
