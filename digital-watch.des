@@ -210,7 +210,8 @@ TRANSITION:
     N: Started.Alarm
     E: selectNext
     C: g.getActiveMode() is 'alarm'
-    O: [DUMP('top left press alarm, end auto end timer')]
+    O: g.endAutoFinishAlarmModeTimer()
+       [DUMP('top left press, end auto end timer')]
 
 # Bottom left press
 TRANSITION:
@@ -218,7 +219,8 @@ TRANSITION:
     N: Started.Alarm
     E: setAlarm
     C: g.getActiveMode() is 'alarm'
-    O: [DUMP('bottom left press alarm, end auto end timer')]
+    O: g.endAutoFinishAlarmModeTimer()
+       [DUMP('bottom left press, end auto end timer')]
 
 # Bottom right press
 TRANSITION:
@@ -226,7 +228,26 @@ TRANSITION:
     N: Started.Alarm
     E: bottomRightPressed
     C: g.getActiveMode() is 'alarm'
-    O: [DUMP('bottom right press alarm, end auto end timer')]
+    O: g.endAutoFinishAlarmModeTimer()
+       [DUMP('bottom right press, end auto end timer')]
+
+# Top left release
+TRANSITION:
+    S: Started.Alarm
+    N: Started.Alarm
+    E: topLeftReleased
+    C: g.getActiveMode() is 'alarm'
+    O: g.startAutoFinishAlarmModeTimer()
+       [DUMP('top left release, start auto end timer')]
+
+# Bottom left release
+TRANSITION:
+    S: Started.Alarm
+    N: Started.Alarm
+    E: bottomLeftReleased
+    C: g.getActiveMode() is 'alarm'
+    O: g.startAutoFinishAlarmModeTimer()
+       [DUMP('bottom left release, start auto end timer')]
 
 #######################
 # ALARM TRANSITIONS END

@@ -28,49 +28,62 @@ class DWatchGUI:
         self.is_chrono_running = False
 
         self.end_auto_finish_edit_time_timer = None
+        self.end_auto_finish_alarm_mode_timer = None
         self.finish_edit_time_timer = None
         self.light_off_timer = None
 
     def handleEventOn(self):
-        self.eventhandler.event("on")
+        self.eventhandler.event('on')
 
     def wait(self):
-        self.eventhandler.event("lightOff2")
-        print "wait"
+        self.eventhandler.event('lightOff2')
+        print('wait')
 
     # -----------------------------------
     # Events to be sent to the Statechart
     # -----------------------------------
 
-    def debug(self):
-        self.eventhandler.event('GUI Debug')
-
-    def topRightPressed(self):
-        self.eventhandler.event('lightOn')
-        self.endLightOffTimer()
-        print 'topRightPressed'
-
-    def topRightReleased(self):
-        self.startLightOffTimer()
-        print "topRightReleased"
-
-    def lightOff(self):
-        self.eventhandler.event('lightOff')
-
     def topLeftPressed(self):
-        print'topLeftPressed'
+        print('topLeftPressed')
         self.eventhandler.event('changeMode', self.getActiveMode())
         self.eventhandler.event('selectNext')
 
-    def topLeftReleased(self):
-        print 'topLeftReleased'
-        self.eventhandler.event('topLeftReleased')
+    def bottomLeftPressed(self):
+        print('bottomLeftPressed')
+        self.eventhandler.event('resetChrono')
+        self.eventhandler.event('increase')
+        self.setBottomLeftPressed(True)
+        self.eventhandler.event('setAlarm')
 
     def bottomRightPressed(self):
         self.eventhandler.event('bottomRightPressed')
         self.eventhandler.event('initChrono')
         self.maybeEditTime()
         self.maybeFinishEditTime()
+
+    def topRightPressed(self):
+        self.eventhandler.event('lightOn')
+        self.endLightOffTimer()
+        print('topRightPressed')
+
+    def topLeftReleased(self):
+        print('topLeftReleased')
+        self.eventhandler.event('topLeftReleased')
+
+    def bottomLeftReleased(self):
+        print('bottomLeftReleased')
+        self.eventhandler.event('stopInc')
+        self.eventhandler.event('onoff')
+        self.eventhandler.event('bottomLeftReleased')
+        self.setBottomLeftPressed(False)
+
+    def bottomRightReleased(self):
+        self.setBottomRightPressed(False)
+        self.eventhandler.event('released')
+
+    def topRightReleased(self):
+        self.startLightOffTimer()
+        print('topRightReleased')
 
     def maybeEditTime(self):
         self.setBottomRightPressed(True)
@@ -91,6 +104,9 @@ class DWatchGUI:
     def finishEditTime(self):
         self.eventhandler.event('finishEdit')
 
+    def finishAlarmMode(self):
+        print('finish alarm mode')
+
     def setToEditTimeInProgress(self, to_edit_time_in_progress):
         self.to_edit_time_in_progress = to_edit_time_in_progress
 
@@ -102,10 +118,6 @@ class DWatchGUI:
 
     # def getToEditAlarmInProgress(self):
     #   return self.to_edit_alarm_in_progress
-
-    def bottomRightReleased(self):
-        self.setBottomRightPressed(False)
-        self.eventhandler.event('released')
 
     def setBottomRightPressed(self, is_pressed):
         self.is_bottom_right_pressed = is_pressed
@@ -122,23 +134,15 @@ class DWatchGUI:
     def getIncreasePressed(self):
         return self.getBottomLeftPressed()
 
-    def bottomLeftPressed(self):
-        print 'bottomLeftPressed'
-        self.eventhandler.event('resetChrono')
-        self.eventhandler.event('increase')
-        self.setBottomLeftPressed(True)
-        self.eventhandler.event('setAlarm')
-
-    def bottomLeftReleased(self):
-        print 'bottomLeftReleased'
-        self.eventhandler.event('stopInc')
-        self.eventhandler.event('onoff')
-        self.eventhandler.event('bottomLeftReleased')
-        self.setBottomLeftPressed(False)
-
     def alarmStart(self):
-        self.eventhandler.event("alarming")
-        print 'alarmStart'
+        self.eventhandler.event('alarming')
+        print('alarmStart')
+
+    def lightOff(self):
+        self.eventhandler.event('lightOff')
+
+    def debug(self):
+        self.eventhandler.event('GUI Debug')
 
     # -----------------------------------
     # Interaction with the GUI elements
@@ -238,3 +242,11 @@ class DWatchGUI:
 
     def endFinishEditTimeTimer(self):
         self.parent.after_cancel(self.finish_edit_time_timer)
+
+    def startAutoFinishAlarmModeTimer(self):
+        self.end_auto_finish_alarm_mode_timer = self.parent.after(AUTO_FINISH_EDIT_AFTER_MS, self.finishAlarmMode)
+
+    def endAutoFinishAlarmModeTimer(self):
+        if self.end_auto_finish_alarm_mode_timer is not None:
+            print('end timer')
+            self.parent.after_cancel(self.end_auto_finish_alarm_mode_timer)
