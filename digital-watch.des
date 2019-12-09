@@ -226,14 +226,24 @@ TRANSITION:
        g.stopSelection()
        [DUMP('change mode from alarm to time')]
 
-# Top left press
+# Increase
+TRANSITION:
+    S: Started.Alarm.AlarmEdit
+    N: Started.Alarm.AlarmEdit
+    E: increase
+    C: g.getActiveMode() is 'alarmEdit'
+    O: g.increaseSelection()
+       [DUMP('Increase')]
+
+# Top left press, select next
 TRANSITION:
     S: Started.Alarm.AlarmEdit
     N: Started.Alarm.AlarmEdit
     E: selectNext
     C: g.getActiveMode() is 'alarmEdit'
     O: g.endAutoFinishAlarmModeTimer()
-       [DUMP('Alarm: top left press, end auto end timer')]
+       g.selectNext()
+       [DUMP('Alarm: top left press, end auto end timer, select next')]
 
 # Bottom left press
 TRANSITION:
@@ -252,7 +262,6 @@ TRANSITION:
     E: setAlarm
     C: g.getActiveMode() is 'alarmEdit'
     O: g.endAutoFinishAlarmModeTimer()
-       # TODO: increase (event)
        [DUMP('Alarm: bottom left press, end auto end timer, start to edit mode timer')]
 
 # Bottom right press
